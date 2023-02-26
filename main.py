@@ -180,7 +180,7 @@ class Maze(object):
                 areaUppRight = (endx - x)*(y - starty)
                 areaDownLeft = (x - startx)*(endy - y)
                 areaDownRight = (endx - x)*(endy - y)
-                if count > 4:
+                if count > 7:
                     stop = True
                     print("Stopped")
                 print(areaDownRight)
@@ -199,13 +199,13 @@ class Maze(object):
                 areaUppRight = (endx - x) * (y - starty)
                 areaDownLeft = (x - startx) * (endy - y)
                 areaDownRight = (endx - x) * (endy - y)
-                if count > 4:
+                if count > 7:
                     stop = True
                     print("Stopped")
                 print(areaDownRight)
                 print(count)
                 m = 1
-            if count < 2:
+            if count < 6:
                 if m == 1:
                     self.RecursiveDevision(startx, endx, starty, y, m, startxin, endxin, startyin, endyin, resolution, MazeWidth, MazeLength, stop, count+1) # Upp Right, m=1
                     self.RecursiveDevision(startx, x, starty, y, m, startxin, endxin, startyin, endyin, resolution, MazeWidth, MazeLength, stop, count+1) # Upp Left, m=2
