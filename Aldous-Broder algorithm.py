@@ -1,8 +1,8 @@
 import random
 
-mazeWidth = 35
-mazeLength = 35
-defaultWall = 5
+mazeWidth = 105
+mazeLength = 105
+defaultWall = 7
 
 
 def output_image_Aldous_Broder(filename, Puzzle):
