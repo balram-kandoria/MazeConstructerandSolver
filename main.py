@@ -9,12 +9,11 @@ import numpy as np
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 
-class Maze(object):
-    def __init__(self, width, height, start, end):
-        self.__width = width
-        self.__height = height
-        self.__start = start
-        self.__end = end
+class Maze(object, Width, Length, Wall):
+    def __init__(self):
+        self.mazeWidth = Width
+        self.mazeLength = Length
+        self.defaultWall = Wall
         self.__alg = ""
         self.__borders = {}
         self.solution = None
@@ -29,11 +28,14 @@ class Maze(object):
         self.desiredResolution = 5
 
     def __str__(self):
-        return "The algorithms available for the maze generator are: X, Y, Z"
+        return "The algorithms available for the maze generator are: Aldous-Broder algorithm, Y, Z"
 
     def set_algGenerate(self, Algorithm):
         '''Sets the algorithm to be used to generate the maze'''
         self.__alg = Algorithm
+
+        if self.__alg == 'Aldous-Broder algorithm':
+            self.Aldous_Broder_Alg(self.mazeWidth, self.mazeLength, self.defaultWall, 'Aldous-Broder algorithm.png')
 
     def mazeBorderCreate(self):
         for i in range(self.__width):
@@ -217,10 +219,6 @@ class Maze(object):
                     self.RecursiveDevision(startx, x, y, endy, m, startxin, endxin, startyin, endyin, resolution, MazeWidth, MazeLength, stop, count+1) # Down Left, m=2
                     self.RecursiveDevision(x, endx, y, endy, m, startxin, endxin, startyin, endyin, resolution, MazeWidth, MazeLength, stop, count+1)  # Down Right, m=1
 
-
-
-
-
     def output_image(self, filename, show_solution=False, show_explored=False):
         from PIL import Image, ImageDraw
         cell_size = 40
@@ -274,5 +272,173 @@ class Maze(object):
 
 
         img.save(filename)
+
+    def output_image_Aldous_Broder(self, filename, Puzzle, mazeWidth, mazeLength):
+        from PIL import Image, ImageDraw
+        cell_size = 40
+
+        # Create a blank canvas
+        img = Image.new(
+            "RGBA",
+            (mazeWidth * cell_size, mazeLength * cell_size),
+            "black"
+        )
+        draw = ImageDraw.Draw(img)
+
+        #solution = self.solution[1] if self.solution is not None else None
+        for i in range(mazeWidth):
+            #input("Prompt")
+            for j in range(mazeLength):
+
+                # Set Border Visual
+                if Puzzle[i][j][0] == 1:
+                    fill = (40, 40, 40)
+                    
+                
+                # Set Path Visual
+                elif Puzzle[i][j][0] == 0:
+                    fill = (255, 255, 255)
+                    
+
+                # Set Starting Point Visual
+                elif Puzzle[i][j][0] == 2:
+                    fill = (124, 252, 0)
+                    
+                # Set Path Visual
+                elif Puzzle[i][j][0] == 3:
+                    fill = (0, 0, 255)
+                    
+                # Set Path Visual
+                elif Puzzle[i][j][0] == 4:
+                    fill = (255, 191, 0)
+                    
+                # Set Ending Point Visual
+                elif Puzzle[i][j][0] == 5:
+                    fill = (255, 0, 0)
+
+            
+
+                # Empty cell
+
+                # Draw cell
+                # if i != mazeWidth-1 or j != mazeLength-1:
+                topBorder = Puzzle[i][j][1]
+                bottomBorder = Puzzle[i][j][2]
+                rightBorder = Puzzle[i][j][4]
+                leftBorder = Puzzle[i][j][3]
+                draw.rectangle(([(i * cell_size + rightBorder, j * cell_size + topBorder),((i + 1) * cell_size - leftBorder, (j + 1) * cell_size - bottomBorder)]),fill=fill)
+
+
+        img.save(filename)
+
+    def chooseDirection(self, x, y, Puzzle):
+                Direction = ['up','down','left','right']
+                validPathChosen = False
+                checkUP = False
+                checkDN = False
+                checkLT = False
+                checkRT = False
+                dir = 0
+                noValid = False
+                while not validPathChosen:
+                    step = random.choice(Direction)
+                    if step == 'up':
+                        if (Puzzle[x][y+1][0] == 0):# and findCycle(Puzzle, x, y+1) == False:
+                            y += 1
+                            validPathChosen = True
+                            dir = 1
+                        else:
+                            checkUP = True
+                    elif step =='down':
+                        if (Puzzle[x][y-1][0] == 0):# and findCycle(Puzzle, x, y-1) == False:
+                            y -= 1
+                            validPathChosen = True
+                            dir = 2
+                        else:
+                            checkDN = True
+                    elif step =='left':
+                        if (Puzzle[x-1][y][0] == 0):# and findCycle(Puzzle, x-1, y) == False:
+                            x -= 1
+                            validPathChosen = True
+                            dir = 3
+                        else:
+                            checkLT = True
+                    elif step =='right':
+                        if (Puzzle[x+1][y][0] == 0):# and findCycle(Puzzle, x+1, y) == False:
+                            x += 1
+                            validPathChosen = True
+                            dir = 4
+                        else:
+                            checkRT = True
+
+                    if checkRT and checkLT and checkDN and checkUP:
+                        noValid = True
+                        break
+                        
+                return  x, y, dir, noValid
+    def Aldous_Broder_Alg(self, mazeWidth, mazeLength, defaultWall, filename):
+        # 0 = Init, 1 = Border, 2 = Start,, 3 = Path with a Valid Next Move, 4 = Path with NO Valid Next Move, 5 = End
+        # Init Maze
+        
+        noWallValue = (defaultWall * -1)
+        Puzzle = []
+        for i in range(mazeWidth):
+            temp = []
+            for j in range(mazeLength):
+                temp.append([0, defaultWall, defaultWall, defaultWall, defaultWall]) # Path, Path Wall Thickness (up, down, left, right)
+            Puzzle.append(temp)
+
+        # Create Maze Border
+        for i in range(mazeWidth):
+            #input("Prompt")
+            for j in range(mazeLength):
+                if (i == 0) or (i == mazeWidth - 1) or (j == 0) or (j == mazeLength-1):
+                    Puzzle[i][j] = [1, defaultWall, defaultWall, defaultWall, defaultWall] # [Border, Border Wall Thickness (up, down, left, right)]
+
+
+        # Choose a random starting point
+        startChosen = False
+        while not startChosen:
+            rnd_indxX = random.randrange(len(Puzzle))
+            rnd_indxY = random.randrange(len(Puzzle[0]))
+
+            if Puzzle[rnd_indxX][rnd_indxY][0] != 1:
+                Puzzle[rnd_indxX][rnd_indxY][0] = 3
+                startChosen = True      
+
+        x, y, dir, noValidPath = self.chooseDirection(rnd_indxX, rnd_indxY, Puzzle)
+        Puzzle[x][y][0] = 3
+        if dir != 0:
+            Puzzle[x][y][dir] = noWallValue
+
+        MazeComplete = False
+        while not MazeComplete:
+            x, y, dir, noValidPath = self.chooseDirection(x, y, Puzzle)
+            Puzzle[x][y][0] = 3
+            if dir != 0:
+                Puzzle[x][y][dir] = noWallValue
+            else:
+                Puzzle[x][y][0] = 4
+                nextMove = []
+                for i in range(mazeWidth):
+                    for j in range(mazeLength):
+                        if Puzzle[i][j][0] == 3:
+                            xnew, ynew, dir, noValidPath = self.chooseDirection(i, j, Puzzle)
+                            if noValidPath:
+                                Puzzle[i][j][0] = 4 # COLOR SET FOR DEBUGGING
+                        if Puzzle[i][j][0] == 3:
+                            nextMove.append([i,j])
+                if len(nextMove) != 0:
+                    newStartingPt = random.choice(nextMove)
+                    x = newStartingPt[0]
+                    y = newStartingPt[1]
+                    #Puzzle[x][y][0] = 2 # COLOR SET FOR DEBUGGING
+                else:
+                    MazeComplete = True
+                    
+        Puzzle[1][1][0] = 2 # Defining the starting position (for the user)
+        Puzzle[mazeWidth-2][mazeLength-2][0] = 5 #Defining the ending position (for the user)
+        
+        self.output_image_Aldous_Broder(filename, Puzzle, mazeWidth, mazeLength)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
