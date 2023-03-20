@@ -1,7 +1,7 @@
 import random
 
-mazeWidth = 35
-mazeLength = 35
+mazeWidth = 5
+mazeLength = 5
 defaultWall = 3
 
 
