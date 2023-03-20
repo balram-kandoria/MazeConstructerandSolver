@@ -1,7 +1,7 @@
 import random
 
-mazeWidth = 10
-mazeLength = 10
+mazeWidth = 50
+mazeLength = 50
 defaultWall = 4
 
 
@@ -50,17 +50,17 @@ def output_image_Kruskals(filename, Puzzle, defaultWall):
 
             # Draw cell
             # if i != mazeWidth-1 or j != mazeLength-1:
-            topBorder = defaultWall
-            bottomBorder = defaultWall
-            rightBorder = defaultWall
-            leftBorder = defaultWall
+            topBorder = Puzzle[i][j][1]
+            bottomBorder = Puzzle[i][j][2]
+            rightBorder = Puzzle[i][j][3]
+            leftBorder = Puzzle[i][j][4]
             draw.rectangle(([(i * cell_size + rightBorder, j * cell_size + topBorder), ((
                 i + 1) * cell_size - leftBorder, (j + 1) * cell_size - bottomBorder)]), fill=fill)
 
     img.save(filename)
 
 
-def pickAWall(x, y, Puzzle):
+def pickAWall(x, y, Puzzle, defaultWall):
     Direction = ['up', 'down', 'left', 'right']
     validPathChosen = False
     checkUP = False
@@ -69,16 +69,19 @@ def pickAWall(x, y, Puzzle):
     checkRT = False
     dir = 0
     noValid = False
+    print('Function While loop')
     while not validPathChosen:
         step = random.choice(Direction)
         if step == 'up':
             try:
                 # and findCycle(Puzzle, x, y+1) == False:
-                if (Puzzle[x][y+2][0] != Puzzle[x][y][0]):
-                    if Puzzle[x][y+2][0] != 1:
-                        y += 2
+                if (Puzzle[x][y+1][0] != Puzzle[x][y][0]):
+                    if Puzzle[x][y+1][0] != 1 and (((Puzzle[x][y+1][1] == defaultWall) and (Puzzle[x][y+1][3] == defaultWall)) or ((Puzzle[x][y+1][2] == defaultWall) and (Puzzle[x][y+1][4] == defaultWall))):
+                        y += 1
                         validPathChosen = True
                         dir = 1
+                    else:
+                        checkUP = True
                 else:
                     checkUP = True
             except:
@@ -87,11 +90,13 @@ def pickAWall(x, y, Puzzle):
         elif step == 'down':
             try:
                 # and findCycle(Puzzle, x, y-1) == False:
-                if (Puzzle[x][y-2][0] != Puzzle[x][y][0]):
-                    if Puzzle[x][y-2][0] != 1:
-                        y -= 2
+                if (Puzzle[x][y-1][0] != Puzzle[x][y][0]):
+                    if Puzzle[x][y-1][0] != 1 and (((Puzzle[x][y-1][1] == defaultWall) and (Puzzle[x][y-1][3] == defaultWall)) or ((Puzzle[x][y-1][2] == defaultWall) and (Puzzle[x][y-1][4] == defaultWall))):
+                        y -= 1
                         validPathChosen = True
                         dir = 2
+                    else:
+                        checkDN = True
                 else:
                     checkDN = True
             except:
@@ -100,11 +105,13 @@ def pickAWall(x, y, Puzzle):
         elif step == 'left':
             try:
                 # and findCycle(Puzzle, x-1, y) == False:
-                if (Puzzle[x-2][y][0] != Puzzle[x][y][0]):
-                    if Puzzle[x-2][y][0] != 1:
-                        x -= 2
+                if (Puzzle[x-1][y][0] != Puzzle[x][y][0]):
+                    if Puzzle[x-1][y][0] != 1 and (((Puzzle[x-1][y][1] == defaultWall) and (Puzzle[x-1][y][3] == defaultWall)) or ((Puzzle[x-1][y][2] == defaultWall) and (Puzzle[x-1][y][4] == defaultWall))):
+                        x -= 1
                         validPathChosen = True
                         dir = 3
+                    else:
+                        checkLT = True
                 else:
                     checkLT = True
             except:
@@ -112,11 +119,13 @@ def pickAWall(x, y, Puzzle):
         elif step == 'right':
             try:
                 # and findCycle(Puzzle, x+1, y) == False:
-                if (Puzzle[x+2][y] != Puzzle[x][y]):
-                    if Puzzle[x+2][y][0] != 1:
-                        x += 2
+                if (Puzzle[x+1][y] != Puzzle[x][y]):
+                    if Puzzle[x+1][y][0] != 1 and (((Puzzle[x+1][y][1] == defaultWall) and (Puzzle[x+1][y][3] == defaultWall)) or ((Puzzle[x+1][y][2] == defaultWall) and (Puzzle[x+1][y][4] == defaultWall))):
+                        x += 1
                         validPathChosen = True
                         dir = 4
+                    else:
+                        checkRT = True
                 else:
                     checkRT = True
             except:
@@ -138,7 +147,8 @@ for i in range(mazeWidth):
     temp = []
     for j in range(mazeLength):
         # Path, Path Wall Thickness (up, down, left, right)
-        temp.append([0])
+        temp.append([0, defaultWall, defaultWall,
+                     defaultWall, defaultWall])
         Wallset.append([i, j])
     Puzzle.append(temp)
 
@@ -148,56 +158,131 @@ for i in range(mazeWidth):
     for j in range(mazeLength):
         if (i == 0) or (i == mazeWidth - 1) or (j == 0) or (j == mazeLength-1):
             # [Border, Border Wall Thickness (up, down, left, right)]
-            Puzzle[i][j] = [1]
+            Puzzle[i][j] = [1, defaultWall, defaultWall,
+                            defaultWall, defaultWall]
+startChosen = False
 
-uniqueValue = 3
+while not startChosen:
+    rnd_indxX = random.randrange(len(Puzzle))
+    rnd_indxY = random.randrange(len(Puzzle[0]))
 
-for run in range(3):
+    if Puzzle[rnd_indxX][rnd_indxY][0] != 1:
+        Puzzle[rnd_indxX][rnd_indxY][0] = 3
+        startChosen = True
+
+uniqueValue = 4
+removeZeros = True
+for run in range(5000):
+    count = 0
     # Choose a random starting point
-    startChosen = False
+    if run != 0:
+        startChosen = False
+        print('Main While loop')
+        temp = []
+        while not startChosen:
+            if removeZeros:
+                for i in range(mazeLength):
+                    for j in range(mazeWidth):
+                        if Puzzle[i][j][0] == 0:
+                            temp.append([i, j])
 
-    while not startChosen:
-        rnd_indxX = random.randrange(len(Puzzle))
-        rnd_indxY = random.randrange(len(Puzzle[0]))
+                if len(temp) > 0:
+                    choice = random.choice(temp)
+                    rnd_indxX = choice[0]
+                    rnd_indxY = choice[1]
+                else:
+                    removeZeros = False
 
-        if Puzzle[rnd_indxX][rnd_indxY][0] != 1:
-            # Puzzle[rnd_indxX][rnd_indxY][0] = uniqueValue
-            startChosen = True
+            elif not removeZeros:
+                rnd_indxX = random.randrange(len(Puzzle))
+                rnd_indxY = random.randrange(len(Puzzle[0]))
+
+            if Puzzle[rnd_indxX][rnd_indxY][0] != 1:
+                if Puzzle[rnd_indxX][rnd_indxY][0] == 0:
+                    Puzzle[rnd_indxX][rnd_indxY][0] = uniqueValue
+                startChosen = True
+            count += 0
+            if count > mazeLength*mazeWidth:
+                break
 
     xold = rnd_indxX
     yold = rnd_indxY
-    x, y, dir, noValid = pickAWall(rnd_indxX, rnd_indxY, Puzzle)
-    print(x)
-    print(y)
-    print(dir)
+    x, y, dir, noValid = pickAWall(rnd_indxX, rnd_indxY, Puzzle, defaultWall)
+    # print(x)
+    # print(y)
+    # print(dir)
+    if noValid == False:
+        startingNode = Puzzle[xold][yold][0]
+        endingNode = Puzzle[x][y][0]
+        if Puzzle[xold][yold][0] > 0:
+            assignSet = Puzzle[xold][yold][0]
+        else:
+            assignSet = uniqueValue
 
-    if Puzzle[xold][yold][0] > 0:
-        assignSet = Puzzle[xold][yold][0]
+        # if Puzzle[x][y][0] > 0:
+        #     print('Value needs to be replaced')
 
-    else:
-        assignSet = uniqueValue
+        Puzzle[x][y][0] = assignSet
+        middleNode = -1
+        if dir == 1:
+            # middleNode = Puzzle[x][y-1][0]
+            # Puzzle[x][y-1][0] = assignSet
+            # Puzzle[x][y-1][2] = noWallValue
+            Puzzle[x][y][dir] = noWallValue
+        elif dir == 2:
+            # middleNode = Puzzle[x][y+1][0]
+            # Puzzle[x][y+1][0] = assignSet
+            # Puzzle[x][y+1][1] = noWallValue
+            Puzzle[x][y][dir] = noWallValue
 
-    if Puzzle[x][y][0] > 0:
-        print('Value needs to be replaced')
+        elif dir == 3:
+            # middleNode = Puzzle[x+1][y][0]
+            # Puzzle[x+1][y][0] = assignSet
+            Puzzle[x][y][4] = noWallValue
+            # Puzzle[x+1][y][4] = noWallValue
+        elif dir == 4:
+            # middleNode = Puzzle[x-1][y][0]
+            # Puzzle[x-1][y][0] = assignSet
+            Puzzle[x][y][3] = noWallValue
+            # Puzzle[x-1][y][3] = noWallValue
 
-    Puzzle[x][y][0] = assignSet
-    if dir == 1:
-        Puzzle[x][y-1][0] = assignSet
-    elif dir == 2:
-        Puzzle[x][y+1][0] = assignSet
-    elif dir == 3:
-        Puzzle[x+1][y][0] = assignSet
-    elif dir == 4:
-        Puzzle[x-1][y][0] = assignSet
+        uniqueValue += 1
 
-    uniqueValue += 1
+        print(f"Run: {run}")
+        print(f"Starting Value: {startingNode}")
+        print(f"Middle Value: {middleNode}")
+        print(f"Ending Value: {endingNode}")
+        print(f"Valid Move: {not(noValid)}")
+        print()
 
+        if endingNode > 1:
+            temp = []
+            for i in range(mazeWidth):
+                # input("Prompt")
+                for j in range(mazeLength):
+                    temp.append(Puzzle[i][j][0])
+                    if Puzzle[i][j][0] == endingNode:
+                        Puzzle[i][j][0] = startingNode
+
+            if len(set(temp)) == 2:
+                break
+
+        # if middleNode > 1:
+        #     for i in range(mazeWidth):
+        #         # input("Prompt")
+        #         for j in range(mazeLength):
+        #             if Puzzle[i][j][0] == middleNode:
+        #                 Puzzle[i][j][0] = startingNode
 
 output_image_Kruskals('Kruskals Test.png', Puzzle, defaultWall)
 
-for i in range(len(Puzzle)):
-    print(Puzzle[i])
-
+temp = []
+for i in range(mazeWidth):
+    for j in range(mazeLength):
+        print(Puzzle[i][j][0], end='  ')
+        temp.append(Puzzle[i][j][0])
+    print()
+print(len(set(temp))-2)
 
 # for i in range(mazeWidth*mazeLength):
 #     print(Wallset[i],  end=" ")
