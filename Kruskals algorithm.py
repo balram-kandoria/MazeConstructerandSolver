@@ -254,11 +254,16 @@ for run in range(4000):
                     UnqiueValSet.pop(choice)
                     MergingSet = Puzzle[rnd_indxX][rnd_indxY][0]
                     print(MergingSet)
+                    temp = []
                     if len(UnqiueValSet) == 0:
                         for width in range(mazeWidth):
                             for length in range(mazeLength):
                                 if Puzzle[width][length][0] > 1:
                                     UnqiueValSet.append([width, length])
+                                    temp.append(Puzzle[width][length][0])
+
+                    if len(set(temp)) == 2:
+                        break
                 except:
                     continue
 
@@ -289,8 +294,8 @@ for run in range(4000):
         #     print('Value needs to be replaced')
 
          # Create a list of the set identifiers for merging
-        if not removeZeros:
-            assignSet = MergingSet
+        # if not removeZeros:
+        #     assignSet = MergingSet
 
         Puzzle[x][y][0] = assignSet
 
