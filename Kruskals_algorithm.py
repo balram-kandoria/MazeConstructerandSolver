@@ -1,11 +1,11 @@
 import random
 
-mazeWidth = 50
-mazeLength = 50
-defaultWall = 4
+# mazeWidth = 50
+# mazeLength = 50
+# defaultWall = 4
 
 
-def output_image_Kruskals(filename, Puzzle, defaultWall):
+def output_image_Kruskals(filename, Puzzle, defaultWall, mazeWidth, mazeLength):
     from PIL import Image, ImageDraw
     cell_size = 40
 
@@ -43,7 +43,7 @@ def output_image_Kruskals(filename, Puzzle, defaultWall):
                 fill = (255, 191, 0)
 
             # Set Ending Point Visual
-            elif Puzzle[i][j][0] == 5:
+            elif Puzzle[i][j][0] < 0:
                 fill = (255, 0, 0)
 
             # Empty cell
@@ -329,9 +329,9 @@ def Kruskals(mazeWidth, mazeLength, defaultWall):
     return Puzzle
 
 
-Puzzle = Kruskals(mazeWidth, mazeLength, defaultWall)
+# Puzzle = Kruskals(mazeWidth, mazeLength, defaultWall)
 
-output_image_Kruskals('Kruskals Test.png', Puzzle, defaultWall)
+# output_image_Kruskals('Kruskals Test.png', Puzzle, defaultWall)
 
 
 # for i in range(mazeWidth*mazeLength):

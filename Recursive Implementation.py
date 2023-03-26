@@ -236,3 +236,8 @@ Puzzle = Recurse(currentX, currentY, Puzzle,
                  noWallValue, [[currentX, currentY]], mazeLength, mazeWidth)
 
 output_image('Recursive.png', Puzzle)
+
+for i in range(mazeLength):
+    for j in range(mazeWidth):
+        print(Puzzle[i][j][0], end=' ')
+    print()

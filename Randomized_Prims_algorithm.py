@@ -1,11 +1,11 @@
 import random
 
-mazeWidth = 5
-mazeLength = 5
-defaultWall = 3
+# mazeWidth = 15
+# mazeLength = 3
+# defaultWall = 3
 
 
-def output_image_Prims(filename, Puzzle):
+def output_image_Prims(filename, Puzzle, mazeWidth, mazeLength):
     from PIL import Image, ImageDraw
     cell_size = 40
 
@@ -45,6 +45,10 @@ def output_image_Prims(filename, Puzzle):
             # Set Ending Point Visual
             elif Puzzle[i][j][0] == 5:
                 fill = (255, 0, 0)
+
+            # Set Ending Point Visual
+            elif Puzzle[i][j][0] == 6:
+                fill = (0, 0, 255)
 
             # Empty cell
 
@@ -175,7 +179,16 @@ def randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall):
         wallY = randomWall[1]
         x, y, dir, noValidPath = pickAWall(wallX, wallY, Puzzle)
         if dir != 0:
-            Puzzle[x][y][dir] = noWallValue
+            if dir == 1:
+                currentdir = 2
+            elif dir == 2:
+                currentdir = 1
+            elif dir == 3:
+                currentdir = 4
+            elif dir == 4:
+                currentdir = 3
+            Puzzle[x][y][dir] = noWallValue/4
+            Puzzle[wallX][wallY][currentdir] = noWallValue/4
             Puzzle[x][y][0] = 3
         else:
             for i in range(mazeWidth):
@@ -187,11 +200,11 @@ def randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall):
     return Puzzle
 
 
-Puzzle = randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall)
+# Puzzle = randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall)
 
-Puzzle[1][1][0] = 2  # Defining the starting position (for the user)
+# Puzzle[1][1][0] = 2  # Defining the starting position (for the user)
 
-# Defining the ending position (for the user)
-Puzzle[mazeWidth-2][mazeLength-2][0] = 5
+# # Defining the ending position (for the user)
+# Puzzle[mazeWidth-2][mazeLength-2][0] = 5
 
-output_image_Prims('Randomized Prims algorithm20x20.png', Puzzle)
+# output_image_Prims('Randomized Prims algorithm.png', Puzzle)
