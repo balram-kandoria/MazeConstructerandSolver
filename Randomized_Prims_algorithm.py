@@ -7,7 +7,7 @@ import random
 
 def output_image_Prims(filename, Puzzle, mazeWidth, mazeLength):
     from PIL import Image, ImageDraw
-    cell_size = 40
+    cell_size = 30
 
     # Create a blank canvas
     img = Image.new(
@@ -48,7 +48,7 @@ def output_image_Prims(filename, Puzzle, mazeWidth, mazeLength):
 
             # Set Ending Point Visual
             elif Puzzle[i][j][0] == 6:
-                fill = (0, 0, 255)
+                fill = (128, 0, 0)
 
             # Empty cell
 

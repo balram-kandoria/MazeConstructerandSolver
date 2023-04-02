@@ -1,9 +1,14 @@
 from Randomized_Prims_algorithm import randomizedPrimsAlg, output_image_Prims
 from Kruskals_algorithm import Kruskals, output_image_Kruskals
 import random
-mazeWidth = 90
-mazeLength = 90
-defaultWall = 3
+import os
+import cv2
+import numpy as np
+import glob
+
+# mazeWidth = 75
+# mazeLength = 75
+# defaultWall = 3
 
 
 def pickAWall(x, y, Puzzle):
@@ -57,86 +62,108 @@ def pickAWall(x, y, Puzzle):
     return x, y, dir, noValid
 
 
-Puzzle = randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall)
+# Puzzle = randomizedPrimsAlg(mazeWidth, mazeLength, defaultWall)
 # Puzzle = Kruskals(mazeWidth, mazeLength, defaultWall)
 
 
-# Refactor Maze
-for i in range(mazeWidth):
-    for j in range(mazeLength):
-        if Puzzle[i][j][0] != 1:
-            Puzzle[i][j][0] = 0
+def DFS(Puzzle, mazeWidth, mazeLength):
+    image = 1
+    # Refactor Maze
+    for i in range(mazeWidth):
+        for j in range(mazeLength):
+            if Puzzle[i][j][0] != 1:
+                Puzzle[i][j][0] = 0
 
-# Defining the starting position (for the user)
-Puzzle[1][1][0] = 2
+    # Defining the starting position (for the user)
+    Puzzle[1][1][0] = 2
 
-# Defining the ending position (for the user)
-Puzzle[mazeWidth-2][mazeLength-2][0] = 5
+    # Defining the ending position (for the user)
+    Puzzle[mazeWidth-2][mazeLength-2][0] = 5
 
-# Pick a starting position
-position = [1, 1]
+    # Create an Image of the Orignal Maze
 
-# Mark the current cell as visited
-# Puzzle[1][1][0] = 3
+    imageName = str(image) + '_DFS' + '.png'
+    cwd = os.getcwd()
+    directory = cwd + '\\' + 'DFS\\' + imageName
+    output_image_Prims(directory, Puzzle, mazeWidth, mazeLength)
 
-Stack = [position]
-mazeSolved = False
-while not mazeSolved:
-    # Check Valid next moves (i.e no wall between current cell and next cell)
-    # Look at surrounding Nodes (1 = up, 2 = down, 3 = left, 4 = right)
-    # Choose the next move in some non-random manner (i.e up, down, left, right)
-    dir = 0
-    move = [0, 0]
-    moveMade = False
-    for i in range(4):
-        dir += 1
+    # Pick a starting position
+    position = [1, 1]
+
+    # Mark the current cell as visited
+    # Puzzle[1][1][0] = 3
+
+    Stack = [position]
+    mazeSolved = False
+    while not mazeSolved:
+        # Check Valid next moves (i.e no wall between current cell and next cell)
+        # Look at surrounding Nodes (1 = up, 2 = down, 3 = left, 4 = right)
+        # Choose the next move in some non-random manner (i.e up, down, left, right)
+        dir = 0
+        move = [0, 0]
+        moveMade = False
+        for i in range(4):
+            dir += 1
+            if not moveMade:
+                if Puzzle[position[0]][position[1]][dir] < 0:
+                    if dir == 1:
+                        if Puzzle[position[0]][position[1] - 1][0] in [0, 5]:
+                            move = [0, -1]
+                            moveMade = True
+                    elif dir == 2:
+                        if Puzzle[position[0]][position[1] + 1][0] in [0, 5]:
+                            move = [0, 1]
+                            moveMade = True
+                    elif dir == 3:
+                        if Puzzle[position[0] + 1][position[1]][0] in [0, 5]:
+                            move = [1, 0]
+                            moveMade = True
+                    else:
+                        if Puzzle[position[0] - 1][position[1]][0] in [0, 5]:
+                            move = [-1, 0]
+                            moveMade = True
+
         if not moveMade:
-            if Puzzle[position[0]][position[1]][dir] < 0:
-                if dir == 1:
-                    if Puzzle[position[0]][position[1] - 1][0] in [0, 5]:
-                        move = [0, -1]
-                        moveMade = True
-                elif dir == 2:
-                    if Puzzle[position[0]][position[1] + 1][0] in [0, 5]:
-                        move = [0, 1]
-                        moveMade = True
-                elif dir == 3:
-                    if Puzzle[position[0] + 1][position[1]][0] in [0, 5]:
-                        move = [1, 0]
-                        moveMade = True
-                else:
-                    if Puzzle[position[0] - 1][position[1]][0] in [0, 5]:
-                        move = [-1, 0]
-                        moveMade = True
+            # Mark Deadend
+            position = Stack[len(Stack)-1][0]
+            Puzzle[position[0]][position[1]][0] = 4
 
-    if not moveMade:
-        # Mark Deadend
-        position = Stack[len(Stack)-1][0]
-        Puzzle[position[0]][position[1]][0] = 4
+            # If dead end is reach pop the last value of the stack and set the last value of the Stack as the current position
+            Stack.pop(len(Stack)-1)
+            position = Stack[len(Stack)-1][0]
+            # print(position)
 
-        # If dead end is reach pop the last value of the stack and set the last value of the Stack as the current position
-        Stack.pop(len(Stack)-1)
-        position = Stack[len(Stack)-1][0]
-        # print(position)
-    else:
-        position = [position[0] + move[0], position[1] + move[1]]
-
-        # End Condition
-        if Puzzle[position[0]][position[1]][0] == 5:
-            mazeSolved = True
+            # Create a image of the current Maze
+            image += 1
+            imageName = str(image) + '_DFS' + '.png'
+            cwd = os.getcwd()
+            directory = cwd + '\\' + 'DFS\\' + imageName
+            output_image_Prims(directory, Puzzle, mazeWidth, mazeLength)
         else:
-            # Make the choosen cell the current cell and mark the current cell as visited
-            Puzzle[position[0]][position[1]][0] = 3
-            # Add current position to Stack
-            Stack.append([position])
+            position = [position[0] + move[0], position[1] + move[1]]
 
-    # print(Stack)
+            # End Condition
+            if Puzzle[position[0]][position[1]][0] == 5:
+                mazeSolved = True
+            else:
+                # Make the choosen cell the current cell and mark the current cell as visited
+                Puzzle[position[0]][position[1]][0] = 3
+                # Add current position to Stack
+                Stack.append([position])
+
+                # Create a image of the current Maze
+                image += 1
+                imageName = str(image) + '_DFS' + '.png'
+                cwd = os.getcwd()
+                directory = cwd + '\\' + 'DFS\\' + imageName
+                output_image_Prims(directory, Puzzle, mazeWidth, mazeLength)
+
+    return Puzzle
 
 
-output_image_Prims('DFS.png',
-                   Puzzle, mazeWidth, mazeLength)
+# Puzzle = DFS(Puzzle, mazeWidth, mazeLength)
 
-for i in range(mazeLength):
-    for j in range(mazeWidth):
-        print(Puzzle[j][i][0], end=' ')
-    print()
+# for i in range(mazeLength):
+#     for j in range(mazeWidth):
+#         print(Puzzle[j][i][0], end=' ')
+#     print()
